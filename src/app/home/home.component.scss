@@ -1,0 +1,19 @@
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 16px;
+}
+
+button {
+    margin: 8px;
+}
+
+.mat-radio-button ~ .mat-radio-button {
+    margin-left: 16px;
+}
+
+.mdc-card {
+    margin-bottom: 10px;
+}
+  

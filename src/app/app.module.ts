@@ -1,43 +1,35 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatTableModule } from '@angular/material/table';
-import { MatListModule } from '@angular/material/list';
 import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatCardModule } from '@angular/material/card'
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatIconModule } from '@angular/material/icon';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatChipsModule } from '@angular/material/chips';
+import { TestrunnerComponent } from './components/testrunner/testrunner.component';
+import { MaterialModule } from './material/material.module';
+import { RouterModule, Routes } from '@angular/router';
+import { HomeComponent } from './home/home.component';
+import { AddLocalConfigurationComponent } from './components/add-local-configuration/add-local-configuration.component'
+
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'device/:deviceId', component: TestrunnerComponent },
+  { path: '**', redirectTo: '/', pathMatch: 'full' }
+];
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    TestrunnerComponent,
+    HomeComponent,
+    AddLocalConfigurationComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    MatTableModule,
-    MatListModule,
+    MaterialModule,
     FormsModule,
-    MatButtonModule,
-    MatProgressBarModule,
-    MatCardModule,
-    MatExpansionModule,
-    MatIconModule,
-    MatGridListModule,
-    MatBadgeModule,
-    MatStepperModule,
-    MatChipsModule
-
+    RouterModule.forRoot(routes)
   ],
   providers: [],
   bootstrap: [AppComponent]

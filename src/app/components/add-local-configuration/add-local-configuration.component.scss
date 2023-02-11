@@ -1,0 +1,13 @@
+.flex-container {
+    display: flex;
+    justify-content: start;
+    flex-wrap: wrap;
+    padding: 16px;
+}
+
+.file-input {
+    display: none;
+}
+.file-upload {
+    padding-left: 20px;
+}

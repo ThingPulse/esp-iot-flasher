@@ -1,0 +1,22 @@
+  .flex-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  
+  button {
+    margin: 8px;
+  }
+  
+  .mat-radio-button ~ .mat-radio-button {
+    margin-left: 16px;
+  }
+
+  .flex-row {
+    display: flex; /* or inline-flex */
+    padding-right: 10px;
+    gap: 20px;
+    align-items: baseline;
+    justify-content: space-between;
+  }

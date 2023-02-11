@@ -48,23 +48,19 @@ export class EspPortService {
   }
 
   async connect() {
-    try {
-      // If port is still open close it first
-      if (this.port && this.connected) {
-        console.log("Port still seems to be connected. Closing");
-        await this.close();
-        this.setState(false);
-      }
-      const port = await navigator.serial.requestPort();
-      await this.openPort(port);
-    } catch (error) {
-      console.error(error);
+
+    // If port is still open close it first
+    if (this.port && this.connected) {
+      console.log("Port still seems to be connected. Closing");
+      await this.close();
       this.setState(false);
     }
+    const port = await navigator.serial.requestPort();
+    await this.openPort(port);
+
   }
 
   async openPort(port: SerialPort) {
-    try {
       this.port = port;
       console.log('oppening port:', port)
       this.port.addEventListener('connect', (event) => {
@@ -77,10 +73,7 @@ export class EspPortService {
       const portInfo = port.getInfo();
       console.log(portInfo);
       this.setState(true);
-    } catch (e) {
-      console.log(e);
-      this.setState(false);
-    }
+
   }
 
   checkForRestart(message: string) {
@@ -185,7 +178,12 @@ export class EspPortService {
     try {
       const loader = new EspLoader(this.port, { debug: false, logger: this.subjectLogger });
       console.log("connecting...");
-      await loader.connect();
+      try {
+        await loader.connect();
+      } catch(e) {
+        this.monitorMessageSource.next("Failed to connect. Close all open monitoring sessions.");
+        return;
+      }
 
       try {
         console.log("connected");

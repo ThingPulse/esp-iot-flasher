@@ -1,0 +1,18 @@
+<h1>Device Class</h1>
+<mat-card *ngFor="let device of deviceConfigurations">
+  <mat-card-header>
+    <img mat-card-avatar *ngIf="device.imageSource !== ''"[src]="device.imageSource" alt="Device"/>
+    <img mat-card-avatar *ngIf="device.imageSource === ''" src="assets/custom.jpeg" alt="Device"/>
+    <mat-card-title>{{device.name}}</mat-card-title>
+  </mat-card-header>
+  <mat-card-actions align="end">
+    <button mat-raised-button color="warn" *ngIf="isLocalConfiguration(device.id)" (click)="deleteDevice(device.id)"><mat-icon>delete_outline</mat-icon> Delete</button>
+    <button mat-raised-button color="primary" [routerLink]="['/device', device.id]">Flash & Test</button>
+
+  </mat-card-actions>
+</mat-card>
+
+
+<app-add-local-configuration></app-add-local-configuration>
+
+

@@ -1,0 +1,84 @@
+
+  <div class="content" role="main">
+  
+    <div>
+      
+      <h2>{{deviceConfiguration.name}}</h2>
+    
+    <mat-card>
+      <mat-card-header>
+        <img [src]="deviceConfiguration.imageSource">
+      </mat-card-header>
+      <mat-card-content>
+        <div class = "flex-row">
+  
+          <br> 
+        </div>
+        <div class="flex-row">
+            <button mat-raised-button color="primary" (click)="flashAndTest()">Flash & Test</button>
+            <div *ngIf="isConnected()">              
+                <span><mat-icon>phonelink</mat-icon> Connected</span>
+            </div>
+            <div *ngIf="!isConnected()">
+                <span><mat-icon>phonelink_off</mat-icon> Disconnected</span>
+            </div>
+        </div>
+        <mat-stepper orientation="vertical" [linear]="true" #stepper>
+          <mat-step label="Flash Device">
+            <div *ngIf="!progresses[0]">{{flasherConsole}}</div>
+            <div *ngFor="let partition of deviceConfiguration.partitions; index as i;" >
+              <div *ngIf="progresses[i]?.progress">
+                {{ partition.name }} {{progresses[i].progress}}%
+                <mat-progress-bar  mode="determinate" [value]="progresses[i].progress"></mat-progress-bar>
+              </div>
+            </div>
+          </mat-step>
+          <mat-step label="Restarting Device">
+            If this message does not disappear please press reset button on device.
+          </mat-step>
+          <mat-step label="Test & Validation">
+            <div *ngFor="let message of firmwareMessages" class="flex-row">
+              <div>{{message.name}}</div>
+              <div style="margin-left: auto">{{message.value}}</div>
+              <div>
+                <button mat-mini-fab [color]="getResultColor(message.result)">{{message.result}}</button>
+              </div>
+            </div>
+          </mat-step>
+        </mat-stepper>
+  
+        <div class="card" *ngIf="false">
+          <button mat-mat-raised-button color="primary" (click)="connect()">Connect</button>
+          <button mat-mat-raised-button (click)="close()" [disabled]="!isConnected()">Close</button>
+          <button mat-mat-raised-button (click)="startMonitor()" [disabled]="!isConnected() || isMonitoring()">Start Monitor</button>
+          <button mat-mat-raised-button (click)="stopMonitor()" [disabled]="!isConnected()  || !isMonitoring()">Stop Monitor</button>
+          <button mat-mat-raised-button (click)="reset()" [disabled]="!isConnected()">Reset</button>
+          <button mat-mat-raised-button (click)="flash()" [disabled]="!isConnected() || isMonitoring()">Flash</button>
+        </div>
+      
+      
+  
+        </mat-card-content>
+      </mat-card>
+      <br/>
+      <div>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+   
+              Serial Console Output
+  
+            </mat-panel-title>
+            <mat-panel-description>
+                Messages: {{messageCount}}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <textarea class="serial-console"  #console [scrollTop]="console.scrollHeight" [(ngModel)]='messageArea' rows="20" cols="100%">                             
+          </textarea>
+        </mat-expansion-panel>
+    </div>
+  </div>
+    
+  </div>
+  
+  

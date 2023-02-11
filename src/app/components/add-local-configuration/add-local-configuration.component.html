@@ -1,0 +1,32 @@
+
+<mat-card>
+      <mat-card-header>
+        <img mat-card-avatar src="assets/custom.jpeg" alt="Device"/>
+        <mat-card-title>Add Custom Configuration</mat-card-title>
+        <mat-card-subtitle>You can use this <a href="https://github.com/ThingPulse/esp32-epulse-feather-testbed" target="_blank">platformio project</a> from github as reference</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="flex-container">
+        <mat-form-field appearance="fill">
+            <mat-label>Device Name</mat-label>
+            <input matInput [(ngModel)]="deviceConfiguration.name">
+        </mat-form-field>
+        <div class="file-upload">
+            <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload>
+
+            <div class="file-upload">
+
+            {{ fileName || "Add firmware file here."}}
+
+            <button mat-mini-fab color="primary" class="upload-btn"
+                (click)="fileUpload.click()">
+                <mat-icon>attach_file</mat-icon>
+            </button>
+            </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="addConfiguration()" [disabled]="!(deviceConfiguration.name !== '' && fileName !== '')">Add</button>
+      </mat-card-actions>
+    
+</mat-card>
+
