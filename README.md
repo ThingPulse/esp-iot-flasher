@@ -30,6 +30,11 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 
 `docker buildx build --platform linux/amd64 -t thingpulse/esp-iot-flasher:1.0.2 .`
 
+## Creating firmware to run the test
+
+The following repository shows how to build a firmware which can be used together with the
+esp-iot-flasher: https://github.com/ThingPulse/esp32-epulse-feather-testbed
+
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
