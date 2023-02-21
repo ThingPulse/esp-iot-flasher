@@ -2,7 +2,11 @@ version: '2'
 services:
     message-server:
         container_name: esp-iot-flasher
-        image: thingpulse/esp-iot-flasher:1.0.5
+        image: thingpulse/esp-iot-flasher:1.0.6
         restart: always
         ports:
             - 8081:80
+        # Example to mount your own device configuration into the container
+        #volumes:
+        #  - ./src/assets:/usr/share/nginx/html/assets:ro
+
