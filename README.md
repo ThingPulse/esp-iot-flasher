@@ -41,6 +41,10 @@ https://github.com/ThingPulse/esp-iot-flasher/blob/1c669c1fe53238a759b6027cf8988
 - name: displayed name of the device
 - imageSource: relative url to the displayed device image
 - partitions: one or several partitions. We recommend to use just one partition if possible
+    - name: of the partition, will be displayed during flashing
+    - data: leave empty
+    - offset: address in the flash at which this partition should be written
+    - url: relative url where the binary file is. Adapt CORS headers if loading from a different domain
 
 ## Changing device configuration when running with docker-compose
 
