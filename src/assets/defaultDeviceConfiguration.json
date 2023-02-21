@@ -1,0 +1,24 @@
+[
+    {
+        "id": "epulse-feather",
+        "name": "ePulse Feather",
+        "imageSource": "assets/feather/epulsefeather.jpg",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "offset": 0,
+            "url": "./assets/feather/app-firmware.bin"
+        }]
+    }, 
+    {
+        "id": "espgateway",
+        "name": "ESPGateway",
+        "imageSource": "assets/espgateway/espgateway.jpg",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "offset": 0,
+            "url": "./assets/espgateway/app-firmware.bin"
+        }]
+    }
+] 

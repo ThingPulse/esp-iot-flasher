@@ -1,5 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { DeviceConfiguration } from '../model/device-configuration';
 
 @Injectable({
@@ -13,40 +14,28 @@ export class DeviceConfigurationService {
 
   localDeviceConfigurations: DeviceConfiguration[];
 
-  deviceConfigurations: DeviceConfiguration[] = [{
-    id: "epulse-feather",
-    name: "ePulse Feather",
-    imageSource: "assets/feather/epulsefeather.jpg",
-      partitions: [{
-        name: 'Firmware',
-        data: new Uint8Array,
-        offset: 0x00,
-        url: './assets/feather/app-firmware.bin'
-      }]
-    }, 
-    {
-      id: "espgateway",
-      name: "ESPGateway",
-      imageSource: "assets/espgateway/espgateway.jpg",
-      partitions: [{
-        name: 'Firmware',
-        data: new Uint8Array,
-        offset: 0x00,
-        url: './assets/espgateway/app-firmware.bin'
-      }]
-    }]; 
+  deviceConfigurations: DeviceConfiguration[] = []; 
 
 
-  constructor() { }
+  constructor(public httpClient: HttpClient) { 
 
-  getDeviceConfigurations(): DeviceConfiguration[] {
+  }
+
+
+  loadDefaultDeviceConfiguration(): Observable<DeviceConfiguration[]> {
+    return this.httpClient.get<DeviceConfiguration[]>("/assets/defaultDeviceConfiguration.json");
+  }
+
+  async getDeviceConfigurations(): Promise<DeviceConfiguration[]> {
+    this.deviceConfigurations = await firstValueFrom(this.loadDefaultDeviceConfiguration());
     this.loadLocalDeviceConfigurations();
     var combinedDeviceConfigurations = this.deviceConfigurations.concat(this.localDeviceConfigurations);
     return combinedDeviceConfigurations;
   }
 
-  getDeviceConfigurationById(id: string) {
-    return this.getDeviceConfigurations().find(x => x.id == id);
+  async getDeviceConfigurationById(id: string) {
+    const combinedConfiguration = await this.getDeviceConfigurations();
+    return combinedConfiguration.find(x => x.id == id);
   }
 
   addOrUpdateLocalStorageConfiguration(deviceConfiguration: DeviceConfiguration) {

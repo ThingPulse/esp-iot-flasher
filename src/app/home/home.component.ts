@@ -14,11 +14,18 @@ export class HomeComponent implements OnInit {
   constructor(public deviceConfigurationService: DeviceConfigurationService) {
 
   }
+
   ngOnInit(): void {
-    this.deviceConfigurations = this.deviceConfigurationService.getDeviceConfigurations();
+    this.loadConfiguration();
     this.deviceConfigurationService.deviceConfigurationStream.subscribe((id) => {
-      this.deviceConfigurations = this.deviceConfigurationService.getDeviceConfigurations();
+      this.loadConfiguration();
     });
+  }
+
+  loadConfiguration() {
+    this.deviceConfigurationService.getDeviceConfigurations().then((configuration) => {
+      this.deviceConfigurations = configuration;
+    })
   }
 
   deleteDevice(id: string) {

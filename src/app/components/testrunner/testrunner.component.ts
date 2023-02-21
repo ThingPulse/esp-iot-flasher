@@ -42,7 +42,9 @@ export class TestrunnerComponent  implements OnInit {
   ngOnInit(): void {
     this.deviceId = this.route.snapshot.paramMap.get("deviceId")!;
     console.log("deviceId: ", this.deviceId);
-    this.deviceConfiguration = this.deviceConfigurationService.getDeviceConfigurationById(this.deviceId)!;
+    this.deviceConfigurationService.getDeviceConfigurationById(this.deviceId).then(configuration => {
+      this.deviceConfiguration = configuration!;
+    })
     this.espPortService.portStateStream.subscribe(isConnected => {
       console.log("isConnected: ", isConnected);
       this.connected = isConnected;
