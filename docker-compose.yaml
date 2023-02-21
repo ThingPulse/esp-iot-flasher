@@ -1,0 +1,8 @@
+version: '2'
+services:
+    message-server:
+        container_name: esp-iot-flasher
+        image: thingpulse/esp-iot-flasher:1.0.5
+        restart: always
+        ports:
+            - 8081:80
