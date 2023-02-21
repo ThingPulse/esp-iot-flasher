@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "esp-smoke-tester": {
+    "esp-iot-flasher": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/esp-smoke-tester",
+            "outputPath": "dist/esp-iot-flasher",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -61,10 +61,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "esp-smoke-tester:build:production"
+              "browserTarget": "esp-iot-flasher:build:production"
             },
             "development": {
-              "browserTarget": "esp-smoke-tester:build:development"
+              "browserTarget": "esp-iot-flasher:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -72,7 +72,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "esp-smoke-tester:build"
+            "browserTarget": "esp-iot-flasher:build"
           }
         },
         "test": {
