@@ -26,7 +26,8 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 The repository contains a sample docker-compose.yaml file. By executing
 `docker-compose up -d`
-in the root of this repository you can start the service.
+in the root of this repository you can start the service. The example docker-compose configuration
+will start the service at http://localhost:8081
 
 ## Changing device configuration
 
@@ -58,7 +59,3 @@ Adapt and uncomment the following lines to use your own configuration files in `
 
 The following repository shows how to build a firmware which can be used together with the
 esp-iot-flasher: https://github.com/ThingPulse/esp32-epulse-feather-testbed
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
