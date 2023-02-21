@@ -4,10 +4,6 @@
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
@@ -15,10 +11,6 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
 ## Building docker image
 
@@ -29,6 +21,19 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ### building docker on ARM for x86
 
 `docker buildx build --platform linux/amd64 -t thingpulse/esp-iot-flasher:1.0.2 .`
+
+### Running with docker-compose
+
+The repository contains a sample docker-compose.yaml file. By executing
+`docker-compose up -d`
+in the root of this repository you can start the service.
+
+## Changing Device configuration
+
+Default configurations loads the browser from the server. The angular application looks for a configuration
+file at `/assets/defaultDeviceConfiguration.json`: 
+
+https://github.com/ThingPulse/esp-iot-flasher/blob/1c669c1fe53238a759b6027cf89888fffa4055e9/src/assets/defaultDeviceConfiguration.json#L1-L24
 
 ## Creating firmware to run the test
 
