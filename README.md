@@ -35,13 +35,20 @@ file at `/assets/defaultDeviceConfiguration.json`:
 
 https://github.com/ThingPulse/esp-iot-flasher/blob/1c669c1fe53238a759b6027cf89888fffa4055e9/src/assets/defaultDeviceConfiguration.json#L1-L24
 
+### Explanation
+
+- id: unique id within this file
+- name: displayed name of the device
+- imageSource: relative url to the displayed device image
+- partitions: one or several partitions. We recommend to use just one partition if possible
+
 ## Changing device configuration when running with docker-compose
 
 Adapt and uncomment the following lines to use your own configuration files in `docker-compose.yaml` 
-`
+```
         volumes:
           - ./src/assets:/usr/share/nginx/html/assets:ro
-`
+```
 
 ## Creating firmware to run the test
 
