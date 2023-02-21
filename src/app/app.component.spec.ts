@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'esp-smoke-tester'`, () => {
+  it(`should have as title 'esp-iot-flasher'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('esp-smoke-tester');
+    expect(app.title).toEqual('esp-iot-flasher');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('esp-smoke-tester app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain('esp-iot-flasher app is running!');
   });
 });
