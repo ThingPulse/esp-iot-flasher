@@ -59,3 +59,15 @@ Adapt and uncomment the following lines to use your own configuration files in `
 
 The following repository shows how to build a firmware which can be used together with the
 esp-iot-flasher: https://github.com/ThingPulse/esp32-epulse-feather-testbed
+
+## FAQ
+
+- Question: The tool doesn't work with Safari or Firefox
+- Answer: This is expected, since neither Safari nor Firefox support WebSerial. Currently only
+  Chrome, Edge and Opera support this feature: https://caniuse.com/web-serial
+
+- Question: When I connect my ESP32 no device shows up in the device pop-up
+- Answer: If your operating system does not support the Serial-To-UART chip you still
+  have to install the driver. Check with your device manufacturer where to get this driver
+
+
