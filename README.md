@@ -28,12 +28,20 @@ The repository contains a sample docker-compose.yaml file. By executing
 `docker-compose up -d`
 in the root of this repository you can start the service.
 
-## Changing Device configuration
+## Changing device configuration
 
 Default configurations loads the browser from the server. The angular application looks for a configuration
 file at `/assets/defaultDeviceConfiguration.json`: 
 
 https://github.com/ThingPulse/esp-iot-flasher/blob/1c669c1fe53238a759b6027cf89888fffa4055e9/src/assets/defaultDeviceConfiguration.json#L1-L24
+
+## Changing device configuration when running with docker-compose
+
+Adapt and uncomment the following lines to use your own configuration files in `docker-compose.yaml` 
+`
+        volumes:
+          - ./src/assets:/usr/share/nginx/html/assets:ro
+`
 
 ## Creating firmware to run the test
 
