@@ -1,5 +1,15 @@
 # ESP-IoT-Flasher
 
+The ESP-IoT-Flasher is web-based tool which is made for simplicity of use.
+A device tester just needs to install the UART driver. After opening the application
+in his browser he selects the device and clicks `Flash & Test`. The web application
+then flashes a firmware to the device and the device responds with tests results from tests
+running on the device.
+
+[![Running the test]
+(https://img.youtube.com/vi/a3fYCeyGAyI/maxresdefault.jpg)]
+(https://www.youtube.com/shorts/a3fYCeyGAyI)
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
