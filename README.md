@@ -6,9 +6,7 @@ in his browser he selects the device and clicks `Flash & Test`. The web applicat
 then flashes a firmware to the device and the device responds with tests results from tests
 running on the device.
 
-[![Running the test]
-(https://img.youtube.com/vi/a3fYCeyGAyI/maxresdefault.jpg)]
-(https://www.youtube.com/shorts/a3fYCeyGAyI)
+[![Running the test](https://img.youtube.com/vi/a3fYCeyGAyI/maxresdefault.jpg)](https://www.youtube.com/shorts/a3fYCeyGAyI)
 
 ## Development server
 
