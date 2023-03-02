@@ -1,8 +1,15 @@
-<mat-toolbar class="mat-elevation-z6" color="primary">
-  <div>&nbsp;</div>
+<mat-toolbar class="mat-elevation-z6 flex-toolbar" color="primary">
   
-  <button mat-raised-button color="primary" [routerLink]="['/']">Home</button>
+    <button mat-raised-button color="primary" [routerLink]="['/']">
+    <mat-icon>home</mat-icon> Home</button>
+    <span>esp-iot-flasher</span>
+    <a href="https://github.com/ThingPulse/esp-iot-flasher" target="_blank"><span><mat-icon>share</mat-icon> Github</span></a>
+    
+    
 </mat-toolbar>
 <div class="container">
   <router-outlet></router-outlet>
 </div>
+<footer class="flex-footer">
+    <span>{{getCurrentYear()}} By <a href="https://www.thingpulse.com">ThingPulse</a></span>
+</footer>

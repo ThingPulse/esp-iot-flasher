@@ -10,6 +10,10 @@ import { Partition } from './shared/utils.service';
 })
 export class AppComponent  {
 
+  getCurrentYear(): number {
+    return new Date().getFullYear();
+  }
+
 }
 
 

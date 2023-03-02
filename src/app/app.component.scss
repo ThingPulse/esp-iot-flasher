@@ -1,3 +1,9 @@
+
+a, a:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
 .container {
     max-width: 800px;
     margin: 4em auto;
@@ -9,10 +15,22 @@
     flex-direction: column;
     justify-content: center;
 }
-
+.flex-toolbar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 16px;
+}
+.flex-footer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 16px;
+}
 .flex-container {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
     padding: 16px;
 }
+
