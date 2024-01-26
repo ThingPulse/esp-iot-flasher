@@ -61,17 +61,15 @@ export class TestrunnerComponent  implements OnInit {
       try { 
         this.firmwareMessages = JSON.parse(message);
         this.espPortService.stopMonitor();
+        if (this.firmwareMessages.length > 0) {
+          console.log("We have a message");
+        }
       } catch(e) {
         this.messageArea = this.messageArea + '\n' + message;
         this.messageCount++;
       }
       
     })
-    this.espPortService.subjectLogger.logStatementStream.subscribe(message => {
-      this.messageArea = this.messageArea + '\n' + message;
-      this.messageCount++;
-      this.flasherConsole = message;
-    });
     this.espPortService.testStateStream.subscribe(state => {
       console.log("Test State: ", state);
       switch(state) {

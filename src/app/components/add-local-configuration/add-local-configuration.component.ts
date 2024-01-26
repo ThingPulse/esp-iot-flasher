@@ -27,7 +27,7 @@ export class AddLocalConfigurationComponent implements OnInit {
       imageSource: "",
       partitions: [{
         name: "Firmware",
-        data: new Uint8Array(),
+        data: "",
         url: "",
         offset: 0x00
       }]

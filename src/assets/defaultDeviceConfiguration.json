@@ -11,6 +11,17 @@
         }]
     }, 
     {
+        "id": "epulse-feather-c6",
+        "name": "ePulse Feather C6",
+        "imageSource": "assets/featherC6/epulsefeather_c6.jpg",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "offset": 0,
+            "url": "./assets/featherC6/app-firmware.bin"
+        }]
+    }, 
+    {
         "id": "espgateway",
         "name": "ESPGateway",
         "imageSource": "assets/espgateway/espgateway.jpg",

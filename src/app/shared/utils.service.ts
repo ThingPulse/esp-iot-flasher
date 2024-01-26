@@ -7,7 +7,7 @@ export async function sleep(ms: number): Promise<void> {
 
 export type Partition = {
   name: string;
-  data: Uint8Array;
+  data: string;
   offset: number;
   url: string;
 };
@@ -54,7 +54,7 @@ export class LineBreakTransformer {
 export class JsonTransformer {
 
   container: any = "";
-  transform(chunk: any, controller: any) {
+  transform(chunk: any, controller: any) { 
       try {
         controller.enqueue(JSON.parse(chunk));
       } catch(e) {

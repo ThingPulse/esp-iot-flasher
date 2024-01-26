@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EspLoader } from 'esptool.ts';
+
+import { ESPLoader, FlashOptions, IEspLoaderTerminal, LoaderOptions, Transport } from "esptool-js";
 import { firstValueFrom, Subject } from 'rxjs';
-import { SubjectLogger } from './subject-logger';
 import { LineBreakTransformer, Partition, PartitionProgress, sleep, TestState } from './utils.service';
+import { MD5, enc  } from 'crypto-js'; 
+
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +17,9 @@ export class EspPortService {
   port!: SerialPort;
 
   private controlCharacter: string = "\n";
+
+  private transport: Transport;
+  private esploader: ESPLoader;
 
   // Publishes state changes of the selected serial port
   private portStateSource = new Subject<boolean>();
@@ -37,12 +42,23 @@ export class EspPortService {
   testStateStream = this.testStateSource.asObservable();
 
   // Characters contained in the first messages after reboot in an ESP32
-  private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO'];
+  private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO', 'entry 0x'];
 
   private reader!: ReadableStreamDefaultReader;
   private readableStreamClosed!: any;
 
-  subjectLogger = new SubjectLogger();
+  private espLoaderTerminal = {
+    clean: () => {
+      this.monitorMessageSource.next("Clean");
+    },
+    writeLine: (data: any) => {
+      this.monitorMessageSource.next(data);
+    },
+    write: (data: any) => {
+      this.monitorMessageSource.next(data);
+    },
+  };
+
 
   constructor(public httpClient: HttpClient) {
   }
@@ -55,7 +71,24 @@ export class EspPortService {
       await this.close();
       this.setState(false);
     }
+
     const port = await navigator.serial.requestPort();
+    this.transport = new Transport(port);
+    try {
+       
+      const flashOptions = {
+        transport: this.transport,
+        baudrate: 115200,
+        terminal: this.espLoaderTerminal
+
+      } as LoaderOptions;
+      this.esploader = new ESPLoader(flashOptions);
+  
+      const chip = await this.esploader.main_fn();
+      console.log(this.esploader.chip);
+    } catch (e) {
+      console.error(e);
+    }
     await this.openPort(port);
 
   }
@@ -69,7 +102,9 @@ export class EspPortService {
       this.port.addEventListener('disconnect', (event) => {
         this.setState(false);
       });
-      await this.port.open({ baudRate: 115200 });
+      if (!this.port.readable) {
+        await this.port.open({ baudRate: 115200 });
+      }
       const portInfo = port.getInfo();
       console.log(portInfo);
       this.setState(true);
@@ -144,6 +179,7 @@ export class EspPortService {
   }
 
   async readLoop() {
+    console.log("Is port readable: " + this.port.readable);
     while (this.port.readable && this.monitorPort) {
       const textDecoder = new TextDecoderStream();
       this.readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
@@ -174,46 +210,40 @@ export class EspPortService {
   }
   
   async flash(partitions: Partition[]) {
-    this.loadData(partitions);
+    await this.loadData(partitions);
     try {
-      const loader = new EspLoader(this.port, { debug: false, logger: this.subjectLogger });
       console.log("connecting...");
-      try {
-        await loader.connect();
-      } catch(e) {
-        this.monitorMessageSource.next("Failed to connect. Close all open monitoring sessions.");
-        return;
-      }
+
 
       try {
-        console.log("connected");
-        console.log("writing device partitions");
-        const chipName = await loader.chipName();
-        const macAddr = await loader.macAddr();
-        console.log("Device info. Chip: " + chipName + "mac: " + macAddr);
-        this.testStateSource.next(TestState.Flashing);
-        await loader.loadStub();
-        await loader.setBaudRate(115200, 921600);
-        let self = this;
+        const fileArray = [];
+        //const progressBars = [];
         for (let i = 0; i < partitions.length; i++) {
-          console.log("\nWriting partition: " + partitions[i].name);
-          this.monitorMessageSource.next("Writing partition: " + partitions[i].name);
-          await loader.flashData(partitions[i].data, partitions[i].offset, function (idx, cnt) {
-            let progressPercent = Math.round((idx * 100 / cnt));
-            console.log("Flashing: ", progressPercent);
-            self.monitorMessageSource.next('Flashing ' + progressPercent + "%");
-            self.flashProgressSource.next({index: i, progress: progressPercent});
-          });
-          this.monitorMessageSource.next("Partition " + partitions[i].name + ": Done");
-          self.flashProgressSource.next({index: i, progress: 100});
-          sleep(100);
+          fileArray.push({ data: partitions[i].data, address: partitions[i].offset });
         }
+        try {
+          const flashOptions: FlashOptions = {
+            fileArray: fileArray,
+            flashSize: "keep",
+            eraseAll: false,
+            compress: true,
+            reportProgress: (fileIndex, written, total) => {
+              this.flashProgressSource.next({index: fileIndex, progress: Math.round((written / total) * 100)});
+            },
+            calculateMD5Hash: (image) => MD5(enc.Latin1.parse(image)).toString(),
+          } as FlashOptions;
+          this.testStateSource.next(TestState.Flashing);
+          await this.esploader.write_flash(flashOptions);
+        } catch (e) {
+          console.error(e);
+
+        } 
         console.log("successfully written device partitions");
         console.log("flashing succeeded");
         this.testStateSource.next(TestState.Flashed);
-        await loader.flashFinish(true);
+        await this.esploader.flash_finish(false);
       } finally {
-        await loader.disconnect();
+        await this.esploader.hard_reset();
       }
     } finally {
       console.log("Done flashing");
@@ -224,7 +254,14 @@ export class EspPortService {
     this.testStateSource.next(TestState.LoadingFirmware);
     await Promise.all(partitions.map(async (partition) => {
       let buffer = await firstValueFrom<ArrayBuffer>(this.httpClient.get(partition.url, { responseType: 'arraybuffer' }));
-      partition.data = new Uint8Array(buffer);
+      console.log("Array Buffer Length: %d", buffer.byteLength);
+      var byteArray = new Uint8Array(buffer);
+      var decoder = new TextDecoder();
+      var value: number;
+      for (var i = 0; i < byteArray.length; i++) {
+        partition.data += String.fromCharCode((byteArray.at(i) || 0));
+      }
+
     }));
   }
 
