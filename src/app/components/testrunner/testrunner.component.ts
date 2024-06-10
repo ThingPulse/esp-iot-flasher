@@ -80,6 +80,12 @@ export class TestrunnerComponent  implements OnInit {
         case TestState.Restarted:
           console.log("Restarted");
           this.stepper.selectedIndex = 2;
+          break;
+        case TestState.Testing:
+          console.log("Testing");
+          this.espPortService.sendSelfTestCommand();
+          break;
+
       }
     });
   }

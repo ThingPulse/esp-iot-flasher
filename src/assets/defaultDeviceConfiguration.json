@@ -31,5 +31,16 @@
             "offset": 0,
             "url": "./assets/espgateway/app-firmware.bin"
         }]
+    },
+    {
+        "id": "pendrives3",
+        "name": "Pendrive S3",
+        "imageSource": "assets/pendrive-s3/pendrive-s3.jpg",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "offset": 0,
+            "url": "./assets/pendrive-s3/app-firmware.bin"
+        }]
     }
 ] 

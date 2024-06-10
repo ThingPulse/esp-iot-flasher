@@ -43,6 +43,7 @@ export class EspPortService {
 
   // Characters contained in the first messages after reboot in an ESP32
   private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO', 'entry 0x'];
+  private selfTestMatchers: string[] = ['READY_FOR_SELFTEST'];
 
   private reader!: ReadableStreamDefaultReader;
   private readableStreamClosed!: any;
@@ -116,7 +117,19 @@ export class EspPortService {
     // and publish a message if that is the case
     for (let matcher of this.resetMessageMatchers) {
       if (message.indexOf(matcher) > -1) {
-        this.testStateSource.next(TestState.Restarted);
+        this.testStateSource.next(TestState.Restarted);        
+        break;
+      }
+    }
+
+  }
+
+  checkForTesting(message: string) {
+    // Check the given console message for some trigger characters
+    // and publish a message if that is the case
+    for (let matcher of this.selfTestMatchers) {
+      if (message.indexOf(matcher) > -1) {
+        this.testStateSource.next(TestState.Testing);        
         break;
       }
     }
@@ -139,6 +152,16 @@ export class EspPortService {
     this.connected = isConnected;
     this.portStateSource.next(this.connected);
     this.testStateSource.next(isConnected ? TestState.Connected : TestState.Initial);
+  }
+
+  async sendSelfTestCommand() {
+        console.log("Sending self test command");
+        const encoder = new TextEncoder();
+        const writer = this.port.writable?.getWriter();
+        if (writer) {
+          await writer.write(encoder.encode("SELFTEST\n"));
+          writer.releaseLock();
+        }
   }
 
 
@@ -198,6 +221,7 @@ export class EspPortService {
           if (value && value !== "") {
             console.log(value);
             this.checkForRestart(value);
+            this.checkForTesting(value);
             this.monitorMessageSource.next(value);
           }
         }
