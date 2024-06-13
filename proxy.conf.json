@@ -1,0 +1,9 @@
+{
+    "/api/*":
+    {
+        "target": "https://iot-flasher.thingpulse.com/",
+        "secure": false,
+        "logLevel": "debug",
+        "changeOrigin": true
+    } 
+}

@@ -7,6 +7,8 @@ import { DeviceConfiguration } from 'src/app/model/device-configuration';
 import { DeviceConfigurationService } from 'src/app/shared/device-configuration.service';
 import { EspPortService } from 'src/app/shared/esp-port.service';
 import { Partition, PartitionProgress, sleep, TestState } from 'src/app/shared/utils.service';
+import { TestResultService } from 'src/app/shared/test-result.service';
+import { TestResult } from 'src/app/model/test-result';
 
 @Component({
   selector: 'app-testrunner',
@@ -17,8 +19,8 @@ export class TestrunnerComponent  implements OnInit {
 
   deviceId: string;
   title = 'ThingPulse Hardware Test Tool';
-  firmwareMessages: any = [];
-  displayedColumns: string[] = ['heapSize', 'freeHeap', 'psramSize', 'freePsram'];
+  firmwareMessages: FirmwareMessage[] = [];
+  
   @ViewChild('stepper') stepper: MatStepper;
 
 
@@ -35,7 +37,8 @@ export class TestrunnerComponent  implements OnInit {
 
   constructor(private espPortService: EspPortService, 
     private route: ActivatedRoute, 
-    private deviceConfigurationService: DeviceConfigurationService) {
+    private deviceConfigurationService: DeviceConfigurationService,
+    private testResultService: TestResultService) {
 
   }
 
@@ -64,6 +67,7 @@ export class TestrunnerComponent  implements OnInit {
         if (this.firmwareMessages.length > 0) {
           console.log("We have a message");
         }
+        this.sendTestResults(this.firmwareMessages);
       } catch(e) {
         this.messageArea = this.messageArea + '\n' + message;
         this.messageCount++;
@@ -159,6 +163,53 @@ export class TestrunnerComponent  implements OnInit {
     return "warn";
   }
 
+  sendTestResults(firmwareMessages: FirmwareMessage[]) {
+    /*
+    [
+      {"name":"Mac Address","value":"DC:54:75:F0:3F:D0","result":"OK"},
+      {"name":"Chip Model","value":"ESP32-S3","result":"OK"},
+      {"name":"Chip Revision","value":"0","result":"OK"},
+      {"name":"Available Cores","value":"2","result":"OK"},
+      {"name":"Heap Size","value":"384kb","result":"OK"},
+      {"name":"Free Heap","value":"333kb","result":"OK"},
+      {"name":"PSRAM Size","value":"0kb","result":"OK"},
+      {"name":"Free PSRAM","value":"0kb","result":"OK"},
+      {"name":"Flash Chip Size","value":"4096kb","result":"OK"},
+      {"name":"External Flash Card Type","value":"SDSC","result":"OK"},
+      {"name":"External Flash Card Size","value":"120MB","result":"OK"},
+      {"name":"Build Date","value":"Jun 10 2024","result":"OK"},
+      {"name":"Build Time","value":"21:27:56","result":"OK"}
+    ]
+    */
+
+    let isOverallSuccess  = true;
+    let macAddress : string = "";
+    firmwareMessages.forEach((message: FirmwareMessage) => {
+      if (message.result === "NOK") {
+        isOverallSuccess = false;
+      }
+      switch(message.name) {
+        case "Mac Address":
+          macAddress = message.value;
+          break;
+      }
+    });
+  
+    let testResult : TestResult = {
+      mac_address: macAddress,
+      device_type: this.deviceConfiguration.name,
+      overall_result: isOverallSuccess ? 'OK' : 'NOK',
+      additional_info: firmwareMessages
+    };
+
+    this.testResultService.sendTestResult(testResult).subscribe(response => {
+      console.log('Test result sent successfully:', response);
+    });
+    
+  }
+
 }
+
+
 
 

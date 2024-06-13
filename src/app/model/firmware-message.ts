@@ -1,8 +1,5 @@
 export interface FirmwareMessage {
-    heapSize: number;
-    freeHeap: number;
-    psramSize: number;
-    freePsram: number;
-    buildTime: string;
-    buildDate: string;
+   name: string;
+   value: string;
+   result: string;
 }
