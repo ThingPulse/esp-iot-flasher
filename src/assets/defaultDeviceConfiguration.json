@@ -42,5 +42,16 @@
             "offset": 0,
             "url": "./assets/pendrive-s3/app-firmware.bin"
         }]
+    },
+    {
+        "id": "tbridge02",
+        "name": "Theengs Bridge v1.1",
+        "imageSource": "assets/tbridge02/tbridge02.png",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "offset": 0,
+            "url": "./assets/tbridge02/app-firmware.bin"
+        }]
     }
 ] 
