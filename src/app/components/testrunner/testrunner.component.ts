@@ -1,5 +1,5 @@
 
-import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute } from '@angular/router';
 import { FirmwareMessage } from 'src/app//model/firmware-message';
@@ -9,20 +9,21 @@ import { EspPortService } from 'src/app/shared/esp-port.service';
 import { Partition, PartitionProgress, sleep, TestState } from 'src/app/shared/utils.service';
 import { TestResultService } from 'src/app/shared/test-result.service';
 import { TestResult } from 'src/app/model/test-result';
+import { Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'app-testrunner',
   templateUrl: './testrunner.component.html',
   styleUrls: ['./testrunner.component.scss']
 })
-export class TestrunnerComponent  implements OnInit {
+export class TestrunnerComponent  implements OnInit, OnDestroy {
 
   deviceId: string;
   title = 'ThingPulse Hardware Test Tool';
   firmwareMessages: FirmwareMessage[] = [];
   
   @ViewChild('stepper') stepper: MatStepper;
-
 
   private connected = false;
   private monitoring = false;
@@ -34,6 +35,7 @@ export class TestrunnerComponent  implements OnInit {
 
   progresses: PartitionProgress[] = new Array();
   deviceConfiguration: DeviceConfiguration;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(private espPortService: EspPortService, 
     private route: ActivatedRoute, 
@@ -43,24 +45,29 @@ export class TestrunnerComponent  implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log("init TestrunnerComponent");
     this.deviceId = this.route.snapshot.paramMap.get("deviceId")!;
     console.log("deviceId: ", this.deviceId);
     this.deviceConfigurationService.getDeviceConfigurationById(this.deviceId).then(configuration => {
       this.deviceConfiguration = configuration!;
     })
-    this.espPortService.portStateStream.subscribe(isConnected => {
+    const portStateStreamSubscription = this.espPortService.portStateStream.subscribe(isConnected => {
       console.log("isConnected: ", isConnected);
       this.connected = isConnected;
-    })
-    this.espPortService.monitorStateStream.subscribe(isMonitoring => {
+    });
+    this.subscriptions.add(portStateStreamSubscription);
+    const monitorStateSubscription = this.espPortService.monitorStateStream.subscribe(isMonitoring => {
       console.log("isMonitoring: ", isMonitoring);
       this.monitoring = isMonitoring;
-    })
-    this.espPortService.flashProgressStream.subscribe(progress => {
-      
+    });
+    this.subscriptions.add(monitorStateSubscription);
+
+    const flashProgressStreamSubscription = this.espPortService.flashProgressStream.subscribe(progress => {
       this.progresses[progress.index] = progress;
-    })
-    this.espPortService.monitorMessageStream.subscribe(message => {
+    });
+    this.subscriptions.add(flashProgressStreamSubscription);
+
+    const monitorStreamSubscription = this.espPortService.monitorMessageStream.subscribe(message => {
       try { 
         this.firmwareMessages = JSON.parse(message);
         this.espPortService.stopMonitor();
@@ -74,7 +81,8 @@ export class TestrunnerComponent  implements OnInit {
       }
       
     })
-    this.espPortService.testStateStream.subscribe(state => {
+    this.subscriptions.add(monitorStreamSubscription);
+    const testStateStreamSubscription = this.espPortService.testStateStream.subscribe(state => {
       console.log("Test State: ", state);
       switch(state) {
         case TestState.Restarting:
@@ -92,8 +100,12 @@ export class TestrunnerComponent  implements OnInit {
 
       }
     });
+    this.subscriptions.add(testStateStreamSubscription);
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
   resetState() {
     this.messageArea = ""
