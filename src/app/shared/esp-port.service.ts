@@ -42,7 +42,7 @@ export class EspPortService {
   testStateStream = this.testStateSource.asObservable();
 
   // Characters contained in the first messages after reboot in an ESP32
-  private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO', 'entry 0x'];
+  private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO', 'entry 0x', 'READY_FOR_SELFTEST'];
   private selfTestMatchers: string[] = ['READY_FOR_SELFTEST'];
 
   private reader!: ReadableStreamDefaultReader;
