@@ -153,17 +153,27 @@ export class TestrunnerComponent  implements OnInit, OnDestroy {
     this.espPortService.flash(this.deviceConfiguration.partitions);
   }
 
+
+
   async flashAndTest() {
     this.resetState();
     try {
     await this.espPortService.connect();
     } catch (e) {
       console.log(e);
+
+
       this.flasherConsole = "Could not open port. Please close all open monitoring sessions or refresh this browser.";
       return;
     }
     await this.espPortService.flash(this.deviceConfiguration.partitions);
     await this.espPortService.resetDevice();
+    await this.espPortService.reconnect();
+    await this.espPortService.startMonitor();
+
+  }
+
+  async test() {
     await this.espPortService.reconnect();
     await this.espPortService.startMonitor();
   }

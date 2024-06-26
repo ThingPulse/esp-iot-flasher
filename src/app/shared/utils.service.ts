@@ -8,6 +8,7 @@ export async function sleep(ms: number): Promise<void> {
 export type Partition = {
   name: string;
   data: string;
+  md5: string;
   offset: number;
   url: string;
 };

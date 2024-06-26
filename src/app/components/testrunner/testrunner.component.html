@@ -34,9 +34,16 @@
             </div>
           </mat-step>
           <mat-step label="Restarting Device">
-            If this message does not disappear please press reset button on device.
+            If this message does not disappear please press reset button on device
+            and click here: 
+            <div>
+              <button mat-raised-button color="primary" (click)="test()">Reconnect & Test</button>
+            </div>
           </mat-step>
           <mat-step label="Test & Validation">
+            <div *ngIf="!firmwareMessages || firmwareMessages.length == 0">
+              <mat-spinner></mat-spinner> Please Wait...
+            </div>
             <div *ngFor="let message of firmwareMessages" class="flex-row">
               <div>{{message.name}}</div>
               <div style="margin-left: auto">{{message.value}}</div>
@@ -62,7 +69,7 @@
       </mat-card>
       <br/>
       <div>
-        <mat-expansion-panel>
+        <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>
    
@@ -73,7 +80,7 @@
                 Messages: {{messageCount}}
             </mat-panel-description>
           </mat-expansion-panel-header>
-          <textarea class="serial-console"  #console [scrollTop]="console.scrollHeight" [(ngModel)]='messageArea' rows="20" cols="100%">                             
+          <textarea class="serial-console"  #console [scrollTop]="console.scrollHeight" [(ngModel)]='messageArea' rows="20" cols="90%">                             
           </textarea>
         </mat-expansion-panel>
     </div>

@@ -140,12 +140,12 @@ export class EspPortService {
     try {
       await this.port.close();
       console.log("Port closed");
-      this.setState(false);
-      await this.openPort(this.port);
     }
     catch (e) {
       console.log('Error clossing port', this.port, e)
     }
+    this.setState(false);
+    await this.openPort(this.port);
   }
 
   setState(isConnected: boolean) {
@@ -203,33 +203,34 @@ export class EspPortService {
 
   async readLoop() {
     console.log("Is port readable: " + this.port.readable);
-    while (this.port.readable && this.monitorPort) {
-      const textDecoder = new TextDecoderStream();
-      this.readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
-      this.reader = textDecoder.readable
-        .pipeThrough(new TransformStream(new LineBreakTransformer(this.controlCharacter)))
-        .getReader();
 
-      try {
-        while (true) {
-          const { value, done } = await this.reader.read();
-          if (done) {
-            console.log("Done reading");
-            this.reader.releaseLock();
-            break;
+      while (this.port.readable && this.monitorPort) {
+        const textDecoder = new TextDecoderStream();
+        this.readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
+        this.reader = textDecoder.readable
+          .pipeThrough(new TransformStream(new LineBreakTransformer(this.controlCharacter)))
+          .getReader();
+        try {
+          while (true) {
+            const { value, done } = await this.reader.read();
+            if (done) {
+              console.log("Done reading");
+              this.reader.releaseLock();
+              break;
+            }
+            if (value && value !== "") {
+              console.log(value);
+              this.checkForRestart(value);
+              this.checkForTesting(value);
+              this.monitorMessageSource.next(value);
+            }
           }
-          if (value && value !== "") {
-            console.log(value);
-            this.checkForRestart(value);
-            this.checkForTesting(value);
-            this.monitorMessageSource.next(value);
-          }
+        } catch (error) {
+          console.error("Read Loop error.", error);
         }
-      } catch (error) {
-        console.error("Read Loop error.", error);
+        console.log(".");
       }
-      console.log(".");
-    }
+
     console.log("Leaving read loop...");
   }
   
@@ -254,12 +255,15 @@ export class EspPortService {
             reportProgress: (fileIndex, written, total) => {
               this.flashProgressSource.next({index: fileIndex, progress: Math.round((written / total) * 100)});
             },
-            calculateMD5Hash: (image) => MD5(enc.Latin1.parse(image)).toString(),
+            calculateMD5Hash: (image) => {
+              MD5(enc.Latin1.parse(image)).toString()
+            },
           } as FlashOptions;
           this.testStateSource.next(TestState.Flashing);
           await this.esploader.write_flash(flashOptions);
         } catch (e) {
           console.error(e);
+          await this.reconnect();
 
         } 
         console.log("successfully written device partitions");
@@ -285,7 +289,15 @@ export class EspPortService {
       for (var i = 0; i < byteArray.length; i++) {
         partition.data += String.fromCharCode((byteArray.at(i) || 0));
       }
-
+      let calculatedMD5 = MD5(enc.Latin1.parse(partition.data)).toString();
+      if (partition.md5 && calculatedMD5 != partition.md5) {
+        this.monitorMessageSource.next("MD5 mismatch for partition: " + partition.name);
+        this.monitorMessageSource.next("Calculated: " + calculatedMD5);
+        this.monitorMessageSource.next("Expected: " + partition.md5);
+        this.monitorMessageSource.next("Please refresh browser and try again.");
+        throw new Error("MD5 mismatch for partition: " + partition.name);
+        return;
+      }
     }));
   }
 

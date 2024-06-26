@@ -39,6 +39,7 @@
         "partitions": [{
             "name": "Firmware",
             "data": [],
+            "md5": "542c41608e25d4aeac703e1bc24b29cf",
             "offset": 0,
             "url": "./assets/pendrive-s3/app-firmware.bin"
         }]

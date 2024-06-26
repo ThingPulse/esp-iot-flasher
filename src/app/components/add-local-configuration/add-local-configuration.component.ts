@@ -28,6 +28,7 @@ export class AddLocalConfigurationComponent implements OnInit {
       partitions: [{
         name: "Firmware",
         data: "",
+        md5: "",
         url: "",
         offset: 0x00
       }]
