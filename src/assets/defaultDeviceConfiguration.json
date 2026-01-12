@@ -45,6 +45,18 @@
         }]
     },
     {
+        "id": "icon256",
+        "name": "Icon256 - Wordclock",
+        "imageSource": "assets/icon256/pendrive-s3.jpg",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "md5": "c9167fc3ae7751ee864eec01654e1aa2",
+            "offset": 0,
+            "url": "./assets/icon256/app-firmware.bin"
+        }]
+    },
+    {
         "id": "tbridge02",
         "name": "Theengs Bridge v1.1",
         "imageSource": "assets/tbridge02/tbridge02.png",

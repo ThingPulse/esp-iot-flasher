@@ -169,6 +169,8 @@ export class TestrunnerComponent  implements OnInit, OnDestroy {
     await this.espPortService.flash(this.deviceConfiguration.partitions);
     await this.espPortService.resetDevice();
     await this.espPortService.reconnect();
+    await sleep(1000); // Wait for device to be ready
+    await this.espPortService.sendCommand('{"ST":true}');
     await this.espPortService.startMonitor();
 
   }

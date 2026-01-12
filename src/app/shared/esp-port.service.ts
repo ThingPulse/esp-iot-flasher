@@ -164,6 +164,16 @@ export class EspPortService {
         }
   }
 
+  async sendCommand(command: string) {
+        console.log("Sending command: " + command);
+        const encoder = new TextEncoder();
+        const writer = this.port.writable?.getWriter();
+        if (writer) {
+          await writer.write(encoder.encode(command + "\n"));
+          writer.releaseLock();
+        }
+  }
+
 
   async resetDevice() {
     /*
