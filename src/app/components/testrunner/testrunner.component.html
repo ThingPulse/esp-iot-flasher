@@ -50,8 +50,9 @@
               <div>
                 <button mat-mini-fab [color]="getResultColor(message.result)">{{message.result}}</button>
               </div>
-            </div>
-          </mat-step>
+            </div>            <div *ngIf="firmwareMessages && firmwareMessages.length > 0">
+              <button mat-raised-button color="primary" (click)="test()">Run test again...</button>
+            </div>          </mat-step>
         </mat-stepper>
   
         <div class="card" *ngIf="false">
