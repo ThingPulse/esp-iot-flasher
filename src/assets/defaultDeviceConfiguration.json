@@ -47,7 +47,7 @@
     {
         "id": "icon256",
         "name": "Icon256 - Wordclock",
-        "imageSource": "assets/icon256/pendrive-s3.jpg",
+        "imageSource": "assets/icon256/icon256.webp",
         "partitions": [{
             "name": "Firmware",
             "data": [],
