@@ -10,11 +10,16 @@ running on the device.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `npm start` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+The footer displays the version from `package.json` and a UTC timestamp generated
+at the start of each npm build (including Docker builds). Update the package version
+for releases; the timestamp updates automatically. Use the npm scripts so build
+metadata is regenerated before Angular runs.
 
 ## Running unit tests
 
@@ -79,3 +84,12 @@ esp-iot-flasher: https://github.com/ThingPulse/esp32-epulse-feather-testbed
   have to install the driver. Check with your device manufacturer where to get this driver
 
 
+
+## ESPGateway Ethernet LTE
+
+Select **ESPGateway Ethernet LTE** for boards fitted with an A7670G modem.
+Its firmware, LTE-labelled image, source snapshot and audit manifest are bundled
+in [src/assets/espgateway-ethernet-lte](src/assets/espgateway-ethernet-lte/README.md).
+The combined firmware flashes at offset `0x0`; **Flash & Test** sends
+`{"ST":true}` to start the test. Connect Ethernet to a DHCP network and power
+the inserted modem. See the bundled guide for pass criteria and fixture checks.

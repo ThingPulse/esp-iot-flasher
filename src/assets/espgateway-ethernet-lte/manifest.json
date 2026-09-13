@@ -1,0 +1,34 @@
+{
+  "device": "ESPGateway Ethernet LTE",
+  "environment": "testbed-a7670",
+  "flash_offset": 0,
+  "start_command": {
+    "ST": true
+  },
+  "serial_baud": 115200,
+  "source_repository": "esp32-gateway/espgateway-ethernet-testbed",
+  "source_base_commit": "fafa925ff2524345733982008534831071b23498",
+  "source_note": "Working-tree source snapshot included; base commit alone does not contain the new test app.",
+  "firmware_policy": "Capture revision only; no approved revision configured.",
+  "files": {
+    "A7670_TESTBED.md": {
+      "bytes": 6956,
+      "sha256": "4c5bc3c5e87a8ace1ff5844a8a15c8946b7bed5792896ecab193b5d6685dde84"
+    },
+    "app-firmware.bin": {
+      "bytes": 4194304,
+      "sha256": "cc5de00372e006fddb1bd13de4db00f38cc3f0c487fc2ddef3dbd2f7a8de0a57"
+    },
+    "espgateway-ethernet-lte.png": {
+      "bytes": 18511,
+      "sha256": "6be98a01008e42f02b06cc9d05e037cf340d16207073e658d65de0b62ed19e57"
+    },
+    "testbed-source.zip": {
+      "bytes": 12095,
+      "sha256": "0c3acf4a4187ed9a82882dbabc8072ff8d331f0efdd63f3343ec0b24e407b313"
+    }
+  },
+  "test_suite": "espgateway-ethernet-a7670g/3",
+  "psram_policy": "Boot memory test only; PSRAM excluded from allocator because Ethernet uses GPIO16.",
+  "test_firmware_elf_sha256": "a1d65b42b04b25a015294f39bb3553be6aa5e7c2147ce8149d61de3f0011edd4"
+}

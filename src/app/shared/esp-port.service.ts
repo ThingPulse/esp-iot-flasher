@@ -291,7 +291,10 @@ export class EspPortService {
   async loadData(partitions: Partition[]) {
     this.testStateSource.next(TestState.LoadingFirmware);
     await Promise.all(partitions.map(async (partition) => {
-      let buffer = await firstValueFrom<ArrayBuffer>(this.httpClient.get(partition.url, { responseType: 'arraybuffer' }));
+      let buffer = await firstValueFrom<ArrayBuffer>(this.httpClient.get(partition.url, {
+        responseType: 'arraybuffer',
+        params: { _cb: Date.now().toString() }
+      }));
       console.log("Array Buffer Length: %d", buffer.byteLength);
       var byteArray = new Uint8Array(buffer);
       var decoder = new TextDecoder();

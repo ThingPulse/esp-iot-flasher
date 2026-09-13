@@ -23,7 +23,9 @@ export class DeviceConfigurationService {
 
 
   loadDefaultDeviceConfiguration(): Observable<DeviceConfiguration[]> {
-    return this.httpClient.get<DeviceConfiguration[]>("/assets/defaultDeviceConfiguration.json");
+    return this.httpClient.get<DeviceConfiguration[]>("/assets/defaultDeviceConfiguration.json", {
+      params: { _cb: Date.now().toString() }
+    });
   }
 
   async getDeviceConfigurations(): Promise<DeviceConfiguration[]> {

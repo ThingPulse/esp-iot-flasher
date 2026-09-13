@@ -1,12 +1,17 @@
 {
   "name": "esp-iot-flasher",
-  "version": "0.0.0",
+  "version": "1.0.13",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "postinstall": "node scripts/generate-build-info.cjs",
+    "prestart": "node scripts/generate-build-info.cjs",
+    "prebuild": "node scripts/generate-build-info.cjs",
+    "prewatch": "node scripts/generate-build-info.cjs",
+    "pretest": "node scripts/generate-build-info.cjs"
   },
   "private": true,
   "dependencies": {

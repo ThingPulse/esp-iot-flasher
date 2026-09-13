@@ -16,4 +16,8 @@ button {
 .mdc-card {
     margin-bottom: 10px;
 }
-  
+
+img[mat-card-avatar] {
+    object-fit: contain;
+    flex-shrink: 0;
+}

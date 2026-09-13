@@ -33,6 +33,20 @@
         }]
     },
     {
+        "id": "espgateway-ethernet-lte",
+        "name": "ESPGateway Ethernet LTE",
+        "imageSource": "assets/espgateway-ethernet-lte/espgateway-ethernet-lte.png",
+        "partitions": [
+            {
+                "name": "Firmware",
+                "data": [],
+                "md5": "e00ddaec2977ebd17cf3dc80e36c8f30",
+                "offset": 0,
+                "url": "./assets/espgateway-ethernet-lte/app-firmware.bin"
+            }
+        ]
+    },
+    {
         "id": "pendrives3",
         "name": "Pendrive S3",
         "imageSource": "assets/pendrive-s3/pendrive-s3.jpg",

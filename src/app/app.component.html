@@ -11,5 +11,5 @@
   <router-outlet></router-outlet>
 </div>
 <footer class="flex-footer">
-    <span>{{getCurrentYear()}} By <a href="https://www.thingpulse.com">ThingPulse</a> 1.0.12</span>
+    <span>{{getCurrentYear()}} By <a href="https://www.thingpulse.com">ThingPulse</a> {{buildInfo.version}} · Built {{buildInfo.timestamp | date:'yyyy-MM-dd HH:mm:ss':'UTC'}} UTC</span>
 </footer>
