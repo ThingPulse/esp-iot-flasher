@@ -12,23 +12,28 @@
   "firmware_policy": "Capture revision only; no approved revision configured.",
   "files": {
     "A7670_TESTBED.md": {
-      "bytes": 6956,
-      "sha256": "4c5bc3c5e87a8ace1ff5844a8a15c8946b7bed5792896ecab193b5d6685dde84"
+      "bytes": 12459,
+      "sha256": "e480d3972471f7b0e8e941269795080e02a84e8d7a22a98e2ac6d084044bd934"
     },
     "app-firmware.bin": {
-      "bytes": 4194304,
-      "sha256": "cc5de00372e006fddb1bd13de4db00f38cc3f0c487fc2ddef3dbd2f7a8de0a57"
+      "bytes": 860192,
+      "sha256": "0dfad412a10254834e7b0a0ca401433c00d59d22e4c5c74b8763825a49cb7930"
     },
     "espgateway-ethernet-lte.png": {
-      "bytes": 18511,
-      "sha256": "6be98a01008e42f02b06cc9d05e037cf340d16207073e658d65de0b62ed19e57"
+      "bytes": 14912,
+      "sha256": "969530f2f3fc3bc78809881dab3e343e9ac84811bc643b938836da960e007b52"
     },
     "testbed-source.zip": {
-      "bytes": 12095,
-      "sha256": "0c3acf4a4187ed9a82882dbabc8072ff8d331f0efdd63f3343ec0b24e407b313"
+      "bytes": 19345,
+      "sha256": "d540a673d1be0ded8d8637ca72ed67069a98779622e9937e09ed499c765538ad"
     }
   },
-  "test_suite": "espgateway-ethernet-a7670g/3",
+  "test_suite": "espgateway-ethernet-a7670g/6",
   "psram_policy": "Boot memory test only; PSRAM excluded from allocator because Ethernet uses GPIO16.",
-  "test_firmware_elf_sha256": "a1d65b42b04b25a015294f39bb3553be6aa5e7c2147ce8149d61de3f0011edd4"
+  "test_firmware_elf_sha256": "5e961c46b6862db34e7ab6d3bc0803309ed19be023f94aea395a432bcf000407",
+  "protocol_version": 2,
+  "test_sets": [
+    "hardware",
+    "cellular"
+  ]
 }

@@ -5,4 +5,6 @@ export interface DeviceConfiguration {
     name: string;
     imageSource: string;
     partitions: Partition[];
+    testSets?: ('hardware' | 'cellular')[];
+    cellular?: { apn: string; url: string };
 }

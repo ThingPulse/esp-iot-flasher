@@ -35,12 +35,14 @@
     {
         "id": "espgateway-ethernet-lte",
         "name": "ESPGateway Ethernet LTE",
+        "testSets": ["hardware", "cellular"],
+        "cellular": {"apn": "internet", "url": "http://cp.cloudflare.com/generate_204"},
         "imageSource": "assets/espgateway-ethernet-lte/espgateway-ethernet-lte.png",
         "partitions": [
             {
                 "name": "Firmware",
                 "data": [],
-                "md5": "e00ddaec2977ebd17cf3dc80e36c8f30",
+                "md5": "d84114b6af423fe2d65e1a332a50cc0c",
                 "offset": 0,
                 "url": "./assets/espgateway-ethernet-lte/app-firmware.bin"
             }

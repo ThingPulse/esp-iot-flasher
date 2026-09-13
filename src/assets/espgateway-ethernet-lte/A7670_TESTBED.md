@@ -4,6 +4,8 @@ Build with `pio run -e testbed-a7670`. Flash locally with
 `pio run -e testbed-a7670 -t upload`, or give the web tester
 `.pio/build/testbed-a7670/app-firmware.bin` at **offset 0x0**. The latter includes
 the bootloader and partition table; `firmware.bin` alone belongs at 0x10000.
+The merged image ends at the firmware boundary; it is not padded to 4 MB.
+The web flasher uploads at 460800 baud and returns to 115200 baud for testing.
 The dedicated merge hook uses this environment's binaries, unlike the legacy
 aggregation script which hardcodes `esp-wrover-kit`.
 
@@ -17,8 +19,8 @@ PPP/data mode must first be returned to AT mode or power-cycled.
 
 USB serial is 115200 baud. Send `{"ST":true}` followed by LF (CRLF also works).
 Boot only initializes interfaces; it does not run tests or emit a result array.
-Malformed commands, false or non-boolean ST values and lines over 127 bytes
-are ignored. One accepted command runs one test and returns one single-line
+Malformed commands, false or non-boolean ST values and lines over 511 bytes
+are ignored. One accepted ST command runs one test and returns one single-line
 JSON array of `{name,value,result}` objects. Send another command after the
 report to rerun without rebooting. Commands arriving during a run are discarded.
 No `READY_FOR_SELFTEST` banner is emitted, since the inspected web tester responds
@@ -62,7 +64,7 @@ that the web tester could mistake for a result.
 - Informational snapshots: ATI identification, radio functionality, SIM/PIN
   state, SIM ICCID, LTE registration, operator, signal quality and serving-cell
   information. Missing SIM, no service, unknown signal and unsupported queries
-  are recorded without claiming a cellular connectivity pass. Queries do not
+  are recorded without claiming a cellular connectivity pass. In the default hardware set, queries do not
   enter a PIN, modify APNs, reset the modem, save settings, or initiate traffic.
 - Audit correlation: board MAC, chip revision, flash size, build date/time,
   test suite version, test firmware **ELF** SHA256, run number (since boot),
@@ -90,6 +92,8 @@ c++ -std=c++11 -Wall -Wextra -Werror test/test_testbed_at_response.cpp -o /tmp/t
 /tmp/testbed-at-test
 c++ -std=c++11 -Wall -Wextra -Werror -I.pio/libdeps/testbed-a7670/ArduinoJson/src test/test_testbed_start_command.cpp -o /tmp/testbed-start-test
 /tmp/testbed-start-test
+c++ -std=c++11 -Wall -Wextra -Werror test/test_testbed_ethernet_state.cpp -o /tmp/testbed-ethernet-test
+/tmp/testbed-ethernet-test
 ```
 
 Hardware acceptance checklist:
@@ -120,3 +124,92 @@ ELF saved with each build is needed to decode that build's backtraces.
 Informational rows now use `OK`; required failures still use `NOK`.
 The observed `A7670G-LLSE` model is accepted as an exact additional identity.
 Other unrecognized model strings still fail identity validation.
+
+## Ethernet reporting in suite version 4
+
+Link state comes from Ethernet connected/disconnected/stop events. Negotiated
+speed and duplex are read through `esp_eth_ioctl` when the link connects;
+failed queries report unavailable/NOK. This bypasses Arduino 2.0.5's unchanged
+`linkUp()` state and hardcoded `fullDuplex()` return value.
+
+The report uses one synchronized snapshot of link, IPv4 address, speed and
+duplex. Disconnect/stop clears all four; a new connection requires a fresh
+IP event before passing the IP check. The existing ten-second DHCP wait uses
+this same state. Test with a cable connected, unplugged and reconnected between
+ST runs. A live link without DHCP should pass link but fail IP; a half-duplex
+link should report false/NOK for full duplex. The report represents the latest
+processed events, not a guarantee that the cable stays connected afterward.
+
+## Protocol 2 / test sets (suite version 5)
+
+`{"CAP":true}` returns a capabilities object:
+`{"type":"capabilities","protocol":2,"testSets":["hardware","cellular"]}`.
+A bare `{"ST":true}` remains a hardware test for old web testers.
+`{"ST":true,"testSet":"hardware"}` selects that same hardware set explicitly.
+A cellular request additionally supplies the fixture APN and test URL:
+
+```json
+{"ST":true,"testSet":"cellular","apn":"internet","url":"http://cp.cloudflare.com/generate_204"}
+```
+
+The URL must return **HTTP 204 with a zero-length body**, without redirecting.
+The web tester defaults to `http://cp.cloudflare.com/generate_204`. The URL stays
+editable; use an endpoint reachable from the test SIM's network, including a
+factory-controlled endpoint if preferred. For example, an nginx location can
+respond with `return 204;`. The browser sends the selected URL to the firmware;
+older firmware keeps its existing behavior. APN defaults to `internet` and can
+be changed in the device configuration or tester form. APNs are limited to 63
+characters and URLs to 200; whitespace, control characters, non-ASCII text,
+quotes and backslashes are rejected to prevent AT-command injection.
+
+The cellular set includes the hardware checks and requires CPIN READY, LTE
+registration (home or roaming, within 120 seconds), packet attach, activation of
+PDP context 1, and a successful GET through the **modem's** HTTP stack. Ethernet
+is not used for this request. HTTP 200, redirects, modem network-error codes,
+timeouts, malformed results, and a lone AT OK do not pass the HTTP test.
+The modem must deliver both the command acknowledgment and HTTPACTION result.
+
+Cellular testing uses mobile data. It configures context 1's APN, and attempts
+to terminate HTTP and deactivate context 1 afterward. The APN configuration is
+not restored; use a dedicated fixture SIM/modem context. No SIM PIN is entered.
+On UART timeout/overflow, cleanup is skipped because command alignment is lost;
+power-cycle the modem before retrying. A cellular run may take several minutes;
+the web tester allows eight minutes. These checks establish data connectivity
+at test time, not billing status or authenticated TLS/certificate compliance.
+For HTTPS endpoints the modem's existing TLS configuration applies.
+
+New result arrays include `Test Set` and `Protocol Version` rows. Unknown sets,
+ambiguous CAP/ST requests, or invalid cellular parameters return a typed error
+object and run no tests. Capability requests do not run tests. Malformed JSON
+and oversized lines are ignored. Commands received during a run are discarded.
+
+The web tester listens before requesting capabilities. After 2.5 seconds with
+no supported response, only hardware testing is allowed, using the original ST
+command (and SELFTEST for firmware requesting that legacy trigger). Automatic
+legacy arrays are also supported. A selected cellular test never falls back to
+hardware. Protocol-2 reports must confirm the requested set and protocol; an
+unconfirmed/mismatched report gets a required NOK audit row. The selected set,
+reported set, and negotiated protocol are stored as audit rows in the existing
+additional_info result field, without changing the REST payload schema. Duplicate arrays are ignored after the first complete report.
+
+Firmware regression checks:
+
+```sh
+c++ -std=c++11 -Wall -Wextra -Werror test/test_testbed_http_action.cpp -o /tmp/testbed-http-test
+/tmp/testbed-http-test
+```
+
+Fixture acceptance: exercise both sets; missing/locked SIM; incorrect APN;
+no registration; unreachable URL; redirect/HTTP 200 response; expected 204;
+repeated cellular tests; and reconnect after unplugging Ethernet. Confirm a
+legacy firmware version can run hardware but cannot record a cellular pass.
+
+### SIM detection (suite 6)
+
+Cellular tests poll `AT+CPIN?` for up to 30 seconds instead of failing on the
+first error. A READY response proceeds immediately; a password request stops
+without entering a PIN/PUK. UART timeout or overflow stops further commands.
+The report records attempts, elapsed time, first response and final response.
+Persistent `SIM not inserted` remains a failure: check card seating and power
+cycle the complete gateway with the SIM inserted before repeating the test.
+Cleanup only runs for data context/HTTP activation attempted by this run.

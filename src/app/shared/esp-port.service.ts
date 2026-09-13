@@ -13,7 +13,8 @@ import { MD5, enc  } from 'crypto-js';
 export class EspPortService {
 
   private connected = false;
-  private monitorPort = true;
+  private monitorPort = false;
+  private monitorTask?: Promise<void>;
   port!: SerialPort;
 
   private controlCharacter: string = "\n";
@@ -45,7 +46,7 @@ export class EspPortService {
   private resetMessageMatchers: string[] = ['rst:0x1', 'configsip', 'mode:DIO', 'entry 0x', 'READY_FOR_SELFTEST'];
   private selfTestMatchers: string[] = ['READY_FOR_SELFTEST'];
 
-  private reader!: ReadableStreamDefaultReader;
+  private reader?: ReadableStreamDefaultReader;
   private readableStreamClosed!: any;
 
   private espLoaderTerminal = {
@@ -67,28 +68,33 @@ export class EspPortService {
   async connect() {
 
     // If port is still open close it first
-    if (this.port && this.connected) {
+    if (this.port && (this.port.readable || this.port.writable)) {
       console.log("Port still seems to be connected. Closing");
       await this.close();
       this.setState(false);
     }
 
     const port = await navigator.serial.requestPort();
+    this.port = port;
     this.transport = new Transport(port);
     try {
        
       const flashOptions = {
         transport: this.transport,
-        baudrate: 115200,
+        // Initial ROM handshake stays at 115200; the loader switches for flashing.
+        romBaudrate: 115200,
+        baudrate: 460800,
         terminal: this.espLoaderTerminal
 
       } as LoaderOptions;
       this.esploader = new ESPLoader(flashOptions);
   
-      const chip = await this.esploader.main_fn();
+      const chip = await this.serialOperation('Connect to bootloader', () => this.esploader.main_fn(), 60000);
       console.log(this.esploader.chip);
     } catch (e) {
       console.error(e);
+      this.setState(false);
+      throw e;
     }
     await this.openPort(port);
 
@@ -137,15 +143,13 @@ export class EspPortService {
   }
 
   async reconnect() {
-    try {
-      await this.port.close();
-      console.log("Port closed");
-    }
-    catch (e) {
-      console.log('Error clossing port', this.port, e)
-    }
+    await this.stopMonitor();
+    if (!this.port) throw new Error('No serial port selected.');
+    // A failed close must not leave the console on the 460800-baud loader port.
     this.setState(false);
-    await this.openPort(this.port);
+    this.monitorMessageSource.next('Switching serial console to 115200 baud...');
+    if (this.port.readable || this.port.writable) await this.serialOperation('Close flashing port', () => this.port.close());
+    await this.serialOperation('Open test console', () => this.openPort(this.port)); // Always reopens the console at 115200.
   }
 
   setState(isConnected: boolean) {
@@ -155,44 +159,41 @@ export class EspPortService {
   }
 
   async sendSelfTestCommand() {
-        console.log("Sending self test command");
-        const encoder = new TextEncoder();
-        const writer = this.port.writable?.getWriter();
-        if (writer) {
-          await writer.write(encoder.encode("SELFTEST\n"));
-          writer.releaseLock();
-        }
+    await this.sendCommand('SELFTEST');
   }
 
   async sendCommand(command: string) {
-        console.log("Sending command: " + command);
-        const encoder = new TextEncoder();
-        const writer = this.port.writable?.getWriter();
-        if (writer) {
-          await writer.write(encoder.encode(command + "\n"));
-          writer.releaseLock();
-        }
+    if (!this.port?.writable) throw new Error('Serial port is not writable. Reconnect and retry.');
+    const writer = this.port.writable.getWriter();
+    try {
+      this.monitorMessageSource.next('Serial TX: ' + command);
+      await this.serialOperation('Send serial command', () => writer.write(new TextEncoder().encode(command + '\n')));
+    } finally {
+      writer.releaseLock();
+    }
   }
 
-
   async resetDevice() {
-    /*
-      State table of the programming circuit
-      DTR   RTS  -> EN   IO0
-      1     1       1    1
-      0     0       1    1
-      1     0       0    1
-      0     1       1    0
-    */
-    console.log("Resetting device");
     this.testStateSource.next(TestState.Restarting);
-    await this.port.setSignals({ dataTerminalReady: false});
-    await this.port.setSignals({ requestToSend: true});
-    sleep(100);
-    await this.port.setSignals({ dataTerminalReady: true});
-    await this.port.setSignals({ requestToSend: false});
-    sleep(50);
-    await this.port.setSignals({ dataTerminalReady: false});
+    this.monitorMessageSource.next('Resetting into application (BOOT released)...');
+    // Normal application reset: never assert DTR/BOOT while releasing EN.
+    await this.serialOperation('Release BOOT', () => this.port.setSignals({ dataTerminalReady: false }));
+    await this.serialOperation('Assert reset', () => this.port.setSignals({ requestToSend: true }));
+    await sleep(100);
+    await this.serialOperation('Release reset', () => this.port.setSignals({ requestToSend: false }));
+    await sleep(100);
+  }
+
+  private async serialOperation<T>(label: string, operation: () => Promise<T>, timeoutMs = 10000): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        operation(),
+        new Promise<T>((_, reject) => {
+          timer = setTimeout(() => reject(new Error(label + ' timed out. Disconnect and reconnect the USB cable, then retry.')), timeoutMs);
+        }),
+      ]);
+    } finally { clearTimeout(timer); }
   }
 
   setMonitorState(isMonitoring: boolean) {
@@ -201,91 +202,67 @@ export class EspPortService {
   }
 
   startMonitor() {
+    if (this.monitorTask) return;
+    if (!this.port?.readable) throw new Error('Serial port is not readable. Reconnect and retry.');
     this.setMonitorState(true);
-    this.readLoop();
+    this.monitorTask = this.readLoop().finally(() => { this.monitorTask = undefined; });
   }
 
   async stopMonitor() {
     this.setMonitorState(false);
-    await this.reader.cancel();
-    await this.readableStreamClosed.catch(() => { });
+    if (this.reader) await this.serialOperation('Stop serial reader', () => this.reader!.cancel().catch(() => { }));
+    if (this.monitorTask) await this.serialOperation('Release serial monitor', () => this.monitorTask!);
   }
 
   async readLoop() {
-    console.log("Is port readable: " + this.port.readable);
-
-      while (this.port.readable && this.monitorPort) {
-        const textDecoder = new TextDecoderStream();
-        this.readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
-        this.reader = textDecoder.readable
-          .pipeThrough(new TransformStream(new LineBreakTransformer(this.controlCharacter)))
-          .getReader();
-        try {
-          while (true) {
-            const { value, done } = await this.reader.read();
-            if (done) {
-              console.log("Done reading");
-              this.reader.releaseLock();
-              break;
-            }
-            if (value && value !== "") {
-              console.log(value);
-              this.checkForRestart(value);
-              this.checkForTesting(value);
-              this.monitorMessageSource.next(value);
-            }
-          }
-        } catch (error) {
-          console.error("Read Loop error.", error);
+    const textDecoder = new TextDecoderStream();
+    // Handle stream failure immediately, even before the line reader exits.
+    this.readableStreamClosed = this.port.readable!.pipeTo(textDecoder.writable).catch(error => {
+      if (this.monitorPort) this.monitorMessageSource.next('Serial read failed: ' + String(error));
+    });
+    const reader = textDecoder.readable
+      .pipeThrough(new TransformStream(new LineBreakTransformer(this.controlCharacter)))
+      .getReader();
+    this.reader = reader;
+    try {
+      while (this.monitorPort) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value && value !== '') {
+          this.checkForRestart(value);
+          this.checkForTesting(value);
+          this.monitorMessageSource.next(value);
         }
-        console.log(".");
       }
-
-    console.log("Leaving read loop...");
+    } catch (error) {
+      if (this.monitorPort) this.monitorMessageSource.next('Serial read failed: ' + String(error));
+    } finally {
+      await reader.cancel().catch(() => { });
+      reader.releaseLock();
+      await this.readableStreamClosed;
+      this.reader = undefined;
+      this.setMonitorState(false);
+    }
   }
-  
+
   async flash(partitions: Partition[]) {
     await this.loadData(partitions);
-    try {
-      console.log("connecting...");
-
-
-      try {
-        const fileArray = [];
-        //const progressBars = [];
-        for (let i = 0; i < partitions.length; i++) {
-          fileArray.push({ data: partitions[i].data, address: partitions[i].offset });
-        }
-        try {
-          const flashOptions: FlashOptions = {
-            fileArray: fileArray,
-            flashSize: "keep",
-            eraseAll: false,
-            compress: true,
-            reportProgress: (fileIndex, written, total) => {
-              this.flashProgressSource.next({index: fileIndex, progress: Math.round((written / total) * 100)});
-            },
-            calculateMD5Hash: (image) => {
-              MD5(enc.Latin1.parse(image)).toString()
-            },
-          } as FlashOptions;
-          this.testStateSource.next(TestState.Flashing);
-          await this.esploader.write_flash(flashOptions);
-        } catch (e) {
-          console.error(e);
-          await this.reconnect();
-
-        } 
-        console.log("successfully written device partitions");
-        console.log("flashing succeeded");
-        this.testStateSource.next(TestState.Flashed);
-        await this.esploader.flash_finish(false);
-      } finally {
-        await this.esploader.hard_reset();
-      }
-    } finally {
-      console.log("Done flashing");
-    }
+    const flashOptions = {
+      fileArray: partitions.map(partition => ({ data: partition.data, address: partition.offset })),
+      flashSize: 'keep',
+      eraseAll: false,
+      compress: true,
+      reportProgress: (index: number, written: number, total: number) => {
+        this.flashProgressSource.next({index, progress: Math.round((written / total) * 100)});
+      },
+      calculateMD5Hash: (image: string) => MD5(enc.Latin1.parse(image)).toString(),
+    } as FlashOptions;
+    this.testStateSource.next(TestState.Flashing);
+    await this.serialOperation('Flash transfer/finalization', () => this.esploader.write_flash(flashOptions), 300000);
+    // write_flash() already calls flash_defl_finish()/flash_finish().
+    // Leave reset to the runner, after reopening and monitoring at console baud.
+    this.monitorMessageSource.next('Flash transfer completed; preparing application console.');
+    this.testStateSource.next(TestState.Flashed);
   }
 
   async loadData(partitions: Partition[]) {
@@ -296,6 +273,7 @@ export class EspPortService {
         params: { _cb: Date.now().toString() }
       }));
       console.log("Array Buffer Length: %d", buffer.byteLength);
+      partition.data = "";
       var byteArray = new Uint8Array(buffer);
       var decoder = new TextDecoder();
       var value: number;
@@ -315,12 +293,8 @@ export class EspPortService {
   }
 
   async close() {
-    try {
-      await this.port.close();
-      console.log("Port closed");
-      this.setState(false);
-    } catch (e) {
-      console.log('Error clossing port', this.port, e)
-    }
+    await this.stopMonitor();
+    this.setState(false);
+    if (this.port && (this.port.readable || this.port.writable)) await this.port.close();
   }
 }

@@ -93,3 +93,47 @@ in [src/assets/espgateway-ethernet-lte](src/assets/espgateway-ethernet-lte/READM
 The combined firmware flashes at offset `0x0`; **Flash & Test** sends
 `{"ST":true}` to start the test. Connect Ethernet to a DHCP network and power
 the inserted modem. See the bundled guide for pass criteria and fixture checks.
+
+## Hardware and cellular test sets
+
+The LTE device now offers **Hardware — no SIM required** and **Hardware +
+cellular — active SIM required** above Flash & Test. In cellular mode enter the
+SIM APN and a URL that returns **HTTP 204 with an empty body**. Defaults can be
+set in the LTE entry in `src/assets/defaultDeviceConfiguration.json`:
+
+```json
+"testSets": ["hardware", "cellular"],
+"cellular": {"apn": "internet", "url": "http://cp.cloudflare.com/generate_204"}
+```
+
+The URL defaults to `http://cp.cloudflare.com/generate_204` and remains editable.
+You can use a factory-controlled endpoint reachable from the test SIM network. The modem sends the request over its
+cellular connection. Use a dedicated fixture context; firmware configures APN
+context 1 and attempts to deactivate it after the test. It does not restore the
+previous APN or enter SIM PINs. These are connectivity tests, not TLS compliance
+or billing checks. Hardware mode retains its existing non-invasive modem queries.
+
+New firmware answers `{"CAP":true}` with protocol 2 capabilities. The browser
+sends the selected set and verifies it in the report before recording success.
+If capabilities are unavailable after 2.5 seconds, hardware tests use the
+original `{"ST":true}` protocol, including support for automatic-report and
+SELFTEST-triggered legacy firmware. Cellular selection is rejected for legacy
+firmware; it never silently falls back. Old web clients still run hardware tests
+against new firmware with a plain ST command.
+
+Requested/reported test set and negotiated protocol are recorded as audit rows
+inside the existing `additional_info` field, so the REST payload schema is
+unchanged. Capability/error objects are not saved as reports. Test controls are
+locked during a run, duplicate arrays are ignored and report timeouts stop the
+monitor (two minutes for hardware, eight for cellular).
+
+Run `npm run test:protocol` for the focused regression suite. Set `CHROME_BIN`
+if Chrome is not discoverable. This uses `tsconfig.protocol.spec.json` because
+older unrelated specs currently have TypeScript errors.
+
+## Flashing speed
+
+The loader connects at 115200 baud and switches to **460800 baud** for flashing.
+After reset, the test console reconnects at 115200 baud. Compression remains
+enabled. LTE combined images include the bootloader and required address gaps
+but omit the trailing padding to 4 MB, reducing erase/write work.

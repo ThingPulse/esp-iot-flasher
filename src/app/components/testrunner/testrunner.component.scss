@@ -30,3 +30,7 @@
   min-width: 0;
   object-fit: contain;
 }
+
+.test-set-options { margin: 1rem 0; }
+.test-set-options label { display: block; margin-top: .75rem; }
+.test-set-options input, .test-set-options select { box-sizing: border-box; width: 100%; max-width: 36rem; padding: .5rem; }

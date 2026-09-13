@@ -1,5 +1,5 @@
 
-  <div class="content" role="main">
+  <div class="content" role="main" *ngIf="deviceConfiguration">
   
     <div>
       
@@ -14,8 +14,23 @@
   
           <br> 
         </div>
+        <div *ngIf="supportsCellular()" class="test-set-options">
+          <label for="test-set">Test set</label>
+          <select id="test-set" [(ngModel)]="selectedTestSet" [disabled]="busy">
+            <option value="hardware">Hardware — no SIM required</option>
+            <option value="cellular">Hardware + cellular — active SIM required</option>
+          </select>
+          <div *ngIf="selectedTestSet === 'cellular'">
+            <label for="cellular-apn">SIM APN</label>
+            <input id="cellular-apn" [(ngModel)]="cellularApn" [disabled]="busy" maxlength="63">
+            <label for="cellular-url">Connectivity test URL</label>
+            <input id="cellular-url" type="url" [(ngModel)]="cellularUrl" [disabled]="busy" maxlength="200" placeholder="https://your-server.example/connectivity">
+            <p>Use an endpoint that returns HTTP 204 with an empty body. This test uses mobile data and can take several minutes.</p>
+          </div>
+        </div>
+        <p *ngIf="testError" role="alert">{{testError}}</p>
         <div class="flex-row">
-            <button mat-raised-button color="primary" (click)="flashAndTest()">Flash & Test</button>
+            <button mat-raised-button color="primary" [disabled]="busy" (click)="flashAndTest()">Flash & Test</button>
             <div *ngIf="isConnected()">              
                 <span><mat-icon>phonelink</mat-icon> Connected</span>
             </div>
@@ -37,12 +52,12 @@
             If this message does not disappear please press reset button on device
             and click here: 
             <div>
-              <button mat-raised-button color="primary" (click)="test()">Reconnect & Test</button>
+              <button mat-raised-button color="primary" [disabled]="busy" (click)="test()">Reconnect & Test</button>
             </div>
           </mat-step>
           <mat-step label="Test & Validation">
-            <div *ngIf="!firmwareMessages || firmwareMessages.length == 0">
-              <mat-spinner></mat-spinner> Please Wait...
+            <div *ngIf="busy && !testError && firmwareMessages.length == 0">
+              <mat-spinner></mat-spinner> {{testStatus || "Please wait…"}}
             </div>
             <div *ngFor="let message of firmwareMessages" class="flex-row">
               <div>{{message.name}}</div>
@@ -50,8 +65,8 @@
               <div>
                 <button mat-mini-fab [color]="getResultColor(message.result)">{{message.result}}</button>
               </div>
-            </div>            <div *ngIf="firmwareMessages && firmwareMessages.length > 0">
-              <button mat-raised-button color="primary" (click)="test()">Run test again...</button>
+            </div>            <div *ngIf="testError || (firmwareMessages && firmwareMessages.length > 0)">
+              <button mat-raised-button color="primary" [disabled]="busy" (click)="test()">Run test again...</button>
             </div>          </mat-step>
         </mat-stepper>
   

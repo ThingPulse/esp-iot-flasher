@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/shared/test-protocol.spec.ts",
+    "src/app/components/testrunner/testrunner.protocol.spec.ts",
+    "src/**/*.d.ts",
+    "src/app/shared/esp-port.protocol.spec.ts"
+  ]
+}

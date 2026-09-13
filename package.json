@@ -11,7 +11,8 @@
     "prestart": "node scripts/generate-build-info.cjs",
     "prebuild": "node scripts/generate-build-info.cjs",
     "prewatch": "node scripts/generate-build-info.cjs",
-    "pretest": "node scripts/generate-build-info.cjs"
+    "pretest": "node scripts/generate-build-info.cjs",
+    "test:protocol": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.protocol.spec.json --include=**/test-protocol.spec.ts --include=**/testrunner.protocol.spec.ts --include=**/esp-port.protocol.spec.ts"
   },
   "private": true,
   "dependencies": {

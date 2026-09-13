@@ -3,7 +3,9 @@
 Select **ESPGateway Ethernet LTE** in the device list and use **Flash & Test**.
 The device needs an inserted, powered A7670G in AT mode and Ethernet connected
 to a DHCP network. The browser sends `{"ST":true}` at 115200 baud. A SIM is
-optional; SIM/network observations do not affect the hardware pass result.
+optional in the hardware test set. The cellular set requires an active data SIM,
+the correct APN and a configured HTTP 204 endpoint; select it above Flash & Test.
+See A7670_TESTBED.md for protocol 2 and the additional required checks.
 
 - `app-firmware.bin`: combined bootloader, partition table and test app; flash at **0x0**.
 - `espgateway-ethernet-lte.png`: LTE/A7670G-labelled variant of the existing gateway thumbnail.
