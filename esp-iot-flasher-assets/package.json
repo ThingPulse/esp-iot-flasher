@@ -1,0 +1,24 @@
+{
+  "name": "esp-iot-flasher-assets",
+  "version": "1.0.0",
+  "description": "Scripts for building and validating the esp-iot-flasher-assets",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "mocha",
+    "start": "node index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThingPulse/esp-iot-flasher-assets.git"
+  },
+  "author": "Daniel Eichhorn, ThingPulse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThingPulse/esp-iot-flasher-assets/issues"
+  },
+  "homepage": "https://github.com/ThingPulse/esp-iot-flasher-assets#readme",
+  "devDependencies": {
+    "chai": "^5.1.1",
+    "mocha": "^10.5.2"
+  }
+}

@@ -1,0 +1,96 @@
+[
+  {
+    "id": "epulse-feather",
+    "name": "ePulse Feather",
+    "imageSource": "assets/feather/epulsefeather.jpg",
+    "partitions": [
+      {
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/feather/app-firmware.bin",
+        "md5": "9f233f267d8deba5e08e9651e32f739b"
+      }
+    ]
+  },
+  {
+    "id": "epulse-feather-c6",
+    "name": "ePulse Feather C6",
+    "imageSource": "assets/featherC6/epulsefeather_c6.jpg",
+    "partitions": [
+      {
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/featherC6/app-firmware.bin",
+        "md5": "4dc7c97745bc6237897d5da1baadd00d"
+      }
+    ]
+  },
+      {
+        "id": "icon256",
+        "name": "Icon256 - Wordclock",
+        "imageSource": "assets/icon256/icon256.webp",
+        "partitions": [{
+            "name": "Firmware",
+            "data": [],
+            "md5": "a5a0e98b5132011718f7d17d23a38784",
+            "offset": 0,
+            "url": "./assets/icon256/app-firmware-20260226.bin"
+        }]
+    },
+  {
+    "id": "pendrive-s3-128mb",
+    "name": "Pendrive S3 - 128MB",
+    "imageSource": "assets/pendrive-s3/pendrive-s3.jpg",
+    "partitions": [
+      {
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/pendrive-s3/app-firmware-20240626.bin",
+        "md5": "542c41608e25d4aeac703e1bc24b29cf"
+      }
+    ]
+  },
+  {
+    "id": "espgateway",
+    "name": "ESPGateway Duo",
+    "imageSource": "assets/espgateway/espgateway.jpg",
+    "partitions": [
+      {
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/espgateway/app-firmware.bin",
+        "md5": "adf60135e828aa4da13018f6b5514723"
+      }
+    ]
+  },
+  {
+    "id": "espgateway-ethernet",
+    "name": "ESPGateway Ethernet",
+    "imageSource": "assets/espgateway-ethernet/espgateway.jpg",
+    "partitions": [{
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/espgateway-ethernet/app-firmware.bin",
+        "md5": "32eb2e9a0be67541cf80550b31b4b6ef"
+    }]
+  },
+  {
+    "id": "tbridge02",
+    "name": "Theengs Bridge v1.1",
+    "imageSource": "assets/tbridge02/tbridge02.png",
+    "partitions": [
+      {
+        "name": "Firmware",
+        "data": [],
+        "offset": 0,
+        "url": "./assets/tbridge02/app-firmware.bin",
+        "md5": "646f1a688191aaecda343bb4b693bc01"
+      }
+    ]
+  }
+]
