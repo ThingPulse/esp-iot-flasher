@@ -1,0 +1,14 @@
+{
+  "file": "app-firmware-20261026.bin",
+  "flashOffset": "0x0000",
+  "environment": "icon256",
+  "sourceRepository": "ThingPulse/WLED-Icon256",
+  "sourceBaseCommit": "f4eeba6240856ac252a55bedb2b192dfe6006d5f",
+  "sourceIncludesUncommittedSelfTestFixes": true,
+  "md5": "55cc442466f53c9fa0aace325dcd575c",
+  "sha256": "5489c896abc81b2cc3923d07d316037c6f100495c5245d2ba30934d6833029dd",
+  "sourceFileSha256": {
+    "usermods/usermod_v2_selftest/usermod_v2_selftest.h": "f24386ce7d6b4b6b463403d3fee6c8ddded10dda7401c662300ef2509d56e3b1",
+    "platformio_override.ini": "8bd31a65bb8ef59396d8501227840c6ddac91ebfe53c5178c3112f7b2cdda8d5"
+  }
+}
