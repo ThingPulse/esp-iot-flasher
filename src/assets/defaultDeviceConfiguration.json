@@ -67,9 +67,9 @@
         "partitions": [{
             "name": "Firmware",
             "data": [],
-            "md5": "55cc442466f53c9fa0aace325dcd575c",
+            "md5": "050ffcbda6552d1be4badc9743328721",
             "offset": 0,
-            "url": "./assets/icon256/app-firmware-20261026.bin"
+            "url": "./assets/icon256/app-firmware-17.0.1.bin"
         }]
     },
     {

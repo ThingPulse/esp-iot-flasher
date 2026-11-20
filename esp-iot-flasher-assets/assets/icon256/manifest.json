@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "file": "app-firmware-17.0.1.bin",
+  "version": "17.0.1",
+  "flashOffset": "0x0000",
+  "environment": "icon256",
+  "chip": "ESP32-S3",
+  "flashSize": 4194304,
+  "sourceRepository": "ThingPulse/WLED-Icon256",
+  "sourceCommit": "29b062b7dd8feeba0ed3abc2258645dea7d9ae29",
+  "sourceIncludesUncommittedSelfTestFixes": false,
+  "md5": "050ffcbda6552d1be4badc9743328721",
+  "sha256": "099336acc8191f80a307df4204f40d11004ac4fe1c0f7cc4ae635596ace0d609",
+  "size": 1382944,
+  "components": [
+    {
+      "file": "bootloader.bin",
+      "offset": 0,
+      "size": 13872,
+      "sha256": "937705b90ee84da062c489d229d18f72457ac919ba3fa95fe81a7b62cf1213d6"
+    },
+    {
+      "file": "partitions.bin",
+      "offset": 32768,
+      "size": 3072,
+      "sha256": "ab7a19ebb0ea19e684687802f2d8f199225a270c6b7dd72d73e8a8876f382e73"
+    },
+    {
+      "file": "boot_app0.bin",
+      "offset": 57344,
+      "size": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    {
+      "file": "firmware.bin",
+      "offset": 65536,
+      "size": 1317408,
+      "sha256": "503de49a4f33160967ce85db1c4f68d096704a6407d1c2bb184b3a70e6a74922"
+    }
+  ],
+  "selfTest": {
+    "command": {
+      "ST": true
+    },
+    "protocol": "legacy",
+    "reportAfter": "Four LED colors and three tones; repeatable without reboot"
+  },
+  "releaseStatus": "Factory build; no 17.0.1 OTA release published by this update"
+}
